@@ -5,10 +5,14 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
-const session = require("express-session");
+const session = require( "express-session" );
+const passport = require("passport");
+const flash = require( "connect-flash" );
+const MongoStore = require("connect-mongo")(session);
 const Category = require("./models/category");
 
 const app = express();
+require("./config/passport");
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost/typicall-ecommerce";
 mongoose
@@ -25,17 +29,38 @@ connection.once("open", () => {
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use( cookieParser() );
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: new MongoStore({
+      mongooseConnection: connection,
+    }),
+    //session expires after 3 hours
+    cookie: { maxAge: 60 * 1000 * 60 * 3 },
+  })
+);
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 //routes config
 const indexRouter = require("./routes/index");
-const productsRouter = require("./routes/products");
+const productsRouter = require( "./routes/products" );
+const usersRouter = require("./routes/user");
+
+app.use( "/products", productsRouter );
+app.use("/user", usersRouter);
 app.use("/", indexRouter);
-app.use("/products", productsRouter);
 
 // global variables across routes
 // some sort of cashing categories on browser locals
 app.use(async (req, res, next) => {
   try {
+    res.locals.login = req.isAuthenticated();
+    res.locals.session = req.session;
+    res.locals.currentUser = req.user;
     const categories = await Category.find({}).sort({ title: 1 }).exec();
     res.locals.categories = categories;
     next();
