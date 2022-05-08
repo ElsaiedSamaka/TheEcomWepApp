@@ -2,8 +2,6 @@
 const router = require("express").Router();
 const Product = require("../models/product");
 const Category = require("../models/category");
-const Cart = require("../models/cart");
-const User = require("../models/user");
 
 router.get("/", async (req, res) => {
   try {
