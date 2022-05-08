@@ -151,8 +151,8 @@ userSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, user.password);
 };
 
-userModel.set("toJSON", { getters: true });
-userModel.options.toJSON.transform = (doc, ret) => {
+userSchema.set("toJSON", { getters: true });
+userSchema.options.toJSON.transform = (doc, ret) => {
   const obj = { ...ret };
   delete obj._id;
   delete obj.__v;
