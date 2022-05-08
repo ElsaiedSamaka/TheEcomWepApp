@@ -11,7 +11,7 @@ const categorySchema = new mongoose.Schema({
   slug: {
     type: String,
     slug: "title",
-    unique: true,
+    unique: false,
   },
 });
 module.exports = mongoose.model("Category", categorySchema);
