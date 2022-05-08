@@ -24,7 +24,7 @@ router.get("/category", async (req, res) => {
 
 
 
-router.get( "/:id", async ( req, res ) => {
+router.get( "/single-product/:id", async ( req, res ) => {
   try {
   const product = await Product.findById(req.params.id);
     res.json( product );
@@ -45,15 +45,7 @@ router.get("/category/:id/products", async (req, res) => {
   res.json(products);
 } );
 
-router.get("/:slug/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id).populate("category");
-    res.json(product,moment().format("YYYY-MM-DD"));
-  } catch (error) {
-    console.log( `error: ${ error.message }` );
-    res.status( 500 ).json( { message: error.message } );
-  }
-});
+
 
 
 router.get("/category/:id/products/:page", async (req, res) => {
@@ -110,4 +102,27 @@ router.get(
   }
 );
 
+// get a certain category by its slug (this is used for the categories navbar)
+router.get("/:slug", async (req, res) => {
+  try {
+    const foundCategory = await Category.findOne({ slug: req.params.slug });
+    const allProducts = await Product.find({ category: foundCategory.id })
+      .sort("-createdAt")
+      .populate("category");
+
+    res.json({foundCategory, allProducts});
+  } catch (error) {
+    console.log( `error: ${ error.message }` );
+    res.status( 500 ).json( { message: error.message } );
+  }
+} );
+router.get("/:slug/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate("category");
+    res.json( { product,moment: moment} );
+  } catch (error) {
+    console.log( `error: ${ error.message }` );
+    res.status( 500 ).json( { message: error.message } );
+  }
+});
 module.exports = router;

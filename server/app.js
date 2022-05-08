@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
@@ -5,10 +6,10 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const Category = require("./models/category");
 
 const app = express();
 
-// mongodb configuration
 const uri = process.env.MONGODB_URI || "mongodb://localhost/typicall-ecommerce";
 mongoose
   .connect(uri, {
@@ -30,6 +31,19 @@ const indexRouter = require("./routes/index");
 const productsRouter = require("./routes/products");
 app.use("/", indexRouter);
 app.use("/products", productsRouter);
+
+// global variables across routes
+// some sort of cashing categories on browser locals
+app.use(async (req, res, next) => {
+  try {
+    const categories = await Category.find({}).sort({ title: 1 }).exec();
+    res.locals.categories = categories;
+    next();
+  } catch (error) {
+    console.log( `error: ${ error.message }` )
+    res.redirect("/");
+  }
+} );
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
