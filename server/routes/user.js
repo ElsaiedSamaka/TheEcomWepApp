@@ -33,14 +33,15 @@ router.post(
     userSignUpValidationRules(),
     validateSignup,
     passport.authenticate("local.signup", {
-    //   successRedirect: "/user/profile",
-    //   failureRedirect: "/user/signup",
+      // successRedirect: "/user/profile",
+      // failureRedirect: "/user/signup",
       failureFlash: true
-    }),
+    } ),
   ],
    async ( req, res ) => {res.json( {pageName: "/user/profile"})
   }
 );
+
 // GET: display the signin form with csrf token
 router.get("/signin", middleware.isNotLoggedIn, async (req, res) => {
     var messages = req.flash( "error" );
@@ -69,7 +70,7 @@ router.post(
       failureFlash: true,
     }),
   ],
-    async ( req, res ) => { res.json( { pageName: "/user/profile" } ) }
+    async ( req, res ) => { res.send(  "/user/profile"  ) }
 );
 
 // GET: display user's profile
@@ -78,7 +79,7 @@ router.get("/profile", middleware.isLoggedIn, async (req, res) => {
     res.json( { orders: null, pageName: "User Profile" });
   } catch (err) {
     console.log(err);
-    return res.redirect("/");
+    return res.send("/");
   }
 });
 
@@ -86,7 +87,7 @@ router.get("/profile", middleware.isLoggedIn, async (req, res) => {
 router.get("/logout", middleware.isLoggedIn, (req, res) => {
   req.logout();
   req.session.cart = null;
-    res.redirect( "/" );
+    res.send( "/" );
     console.log("logout");  
 });
 module.exports = router;

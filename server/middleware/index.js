@@ -5,14 +5,14 @@ middlewareObject.isNotLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
     return next();
   }
-  res.redirect("/");
+  res.json({mssg:"not logged in"});
 };
 
 middlewareObject.isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect("/");
+  res.json({mssg:"logged in"});
 };
 
 module.exports = middlewareObject;

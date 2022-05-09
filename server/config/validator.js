@@ -25,8 +25,8 @@ const validateSignup = (req, res, next) => {
       messages.push(error.msg);
       console.log(messages);
     });
-    req.flash("error", messages[0]);
-    // return res.redirect("/user/signup");
+    req.flash("error", messages);
+    return res.send("/user/signup");
   }
   next();
 };
@@ -39,8 +39,8 @@ const validateSignin = (req, res, next) => {
       messages.push(error.msg);
       console.log(messages);
     });
-    req.flash("error", messages[0]);
-    // return res.redirect("/user/signin");
+    req.flash("error", messages);
+    return res.send("/user/signin");
   }
   next();
 };
