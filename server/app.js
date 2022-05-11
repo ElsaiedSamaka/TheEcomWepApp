@@ -1,13 +1,14 @@
 /* eslint-disable no-undef */
 require("dotenv").config();
+const cors = require("cors");
 const createError = require("http-errors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
-const session = require( "express-session" );
+const session = require("express-session");
 const passport = require("passport");
-const flash = require( "connect-flash" );
+const flash = require("connect-flash");
 const MongoStore = require("connect-mongo")(session);
 const Category = require("./models/category");
 
@@ -27,6 +28,7 @@ connection.once("open", () => {
 });
 //app configuration
 app.use(logger("dev"));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use( cookieParser() );

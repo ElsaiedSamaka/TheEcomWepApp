@@ -9,12 +9,12 @@ const userSchema =  Schema({
     unique: true,
     lowercase: true,
     trim: true,
-    validate: {
-      validator: (email) => {
-        // eslint-disable-next-line no-useless-escape
-        return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
-      },
-    },
+    // validate: {
+    //   validator: (email) => {
+    //     // eslint-disable-next-line no-useless-escape
+    //     return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
+    //   },
+    // },
     password: {
       type: String,
       required: true,
@@ -146,7 +146,20 @@ userSchema.pre("save", function (next) {
       next();
     });
   });
-});
+} );
+// encrypt the password before storing
+userSchema.methods.encryptPassword = (password) => {
+  return bcrypt.hashSync(password, bcrypt.genSaltSync(5), null);
+};
+
+userSchema.methods.validPassword = function (candidatePassword) {
+  if (this.password != null) {
+    return bcrypt.compareSync(candidatePassword, this.password);
+  } else {
+    return false;
+  }
+};
+
 userSchema.methods.comparePassword = function (password) {
   const user = this;
   return bcrypt.compareSync(password, user.password);

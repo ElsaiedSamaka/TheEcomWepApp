@@ -13,8 +13,8 @@ const {
   validateSignup,
   validateSignin,
 } = require("../config/validator");
-const csrfProtection = csrf();
-router.use(csrfProtection);
+// const csrfProtection = csrf();
+// router.use(csrfProtection);
 
 // GET: display the signup form with csrf token
 router.get("/signup", middleware.isNotLoggedIn, (req, res) => {
@@ -22,7 +22,7 @@ router.get("/signup", middleware.isNotLoggedIn, (req, res) => {
     res.json( {
     pageName: "Sign Up",
     messages,
-    csrfToken: req.csrfToken(),
+    // csrfToken: req.csrfToken(),
     })
 });
 // POST: handle the signup logic
@@ -32,13 +32,17 @@ router.post(
     middleware.isNotLoggedIn,
     userSignUpValidationRules(),
     validateSignup,
-    passport.authenticate("local.signup", {
-      // successRedirect: "/user/profile",
-      // failureRedirect: "/user/signup",
-      failureFlash: true
-    } ),
+    passport.authenticate(
+      "local.signup",
+      {
+        // successRedirect: "/user/profile",
+        // failureRedirect: "/user/signup",
+        failureFlash: true,
+      }
+    ),
   ],
-   async ( req, res ) => {res.json( {pageName: "/user/profile"})
+  async (req, res) => {
+    res.json({ pageName: "/user/profile" });
   }
 );
 
@@ -48,7 +52,7 @@ router.get("/signin", middleware.isNotLoggedIn, async (req, res) => {
     res.json( {
     pageName: "user/signin",
     messages,
-    csrfToken: req.csrfToken(),
+    // csrfToken: req.csrfToken(),
     })
 //   res.render("user/signin", {
 //     csrfToken: req.csrfToken(),
