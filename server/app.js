@@ -10,22 +10,16 @@ const session = require("express-session");
 const passport = require("passport");
 const flash = require("connect-flash");
 const MongoStore = require("connect-mongo")(session);
-const Category = require("./models/category");
+const Category = require( "./models/category" );
+const connectDB = require("./config/db");
+
 
 const app = express();
 require("./config/passport");
 
-const uri = process.env.MONGODB_URI || "mongodb://localhost/typicall-ecommerce";
-mongoose
-  .connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .catch((error) => console.log(error));
-const connection = mongoose.connection;
-connection.once("open", () => {
-  console.log("MONGODB CONNECTED SUCCESSFULLY!");
-});
+// mongodb configuration
+connectDB();
+
 //app configuration
 app.use(logger("dev"));
 app.use(cors());
@@ -38,7 +32,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: new MongoStore({
-      mongooseConnection: connection,
+      mongooseConnection: mongoose.connection,
     }),
     //session expires after 3 hours
     cookie: { maxAge: 60 * 1000 * 60 * 3 },

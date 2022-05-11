@@ -1,21 +1,11 @@
 require("dotenv").config();
-
+const connectDB = require("./config/db");
 const Product = require("../models/product");
 const Category = require("../models/category");
 const mongoose = require("mongoose");
 const faker = require("faker");
 
-const uri = process.env.MONGODB_URI || "mongodb://localhost/typicall-ecommerce";
-mongoose
-  .connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .catch((error) => console.log(error));
-const connection = mongoose.connection;
-connection.once("open", () => {
-  console.log("MONGODB CONNECTED SUCCESSFULLY!");
-});
+connectDB();
 
 async function seedDB() {
   faker.seed(0);
