@@ -26,6 +26,7 @@ router.get("/signup", middleware.isNotLoggedIn, (req, res) => {
     })
 });
 // POST: handle the signup logic
+// req.body : { email , password , password2 , name }
 router.post(
   "/signup",
   [
@@ -41,8 +42,27 @@ router.post(
       }
     ),
   ],
-  async (req, res) => {
-    res.json({ pageName: "/user/profile" });
+   async (req, res) => {
+    try {
+      //if there is cart session, save it to the user's cart in db
+      if (req.session.cart) {
+        const cart = await new Cart(req.session.cart);
+        cart.user = req.user._id;
+        await cart.save();
+      }
+      // redirect to the previous URL
+      if (req.session.oldUrl) {
+        var oldUrl = req.session.oldUrl;
+        req.session.oldUrl = null;
+        res.redirect(oldUrl);
+      } else {
+        res.send("/user/profile");
+      }
+    } catch (err) {
+      console.log(err);
+      req.flash("error", err.message);
+      return res.send("/");
+    }
   }
 );
 
@@ -62,6 +82,7 @@ router.get("/signin", middleware.isNotLoggedIn, async (req, res) => {
 });
 
 // POST: handle the signin logic
+// req.body : { email, password }
 router.post(
   "/signin",
   [
@@ -74,13 +95,46 @@ router.post(
       failureFlash: true,
     }),
   ],
-    async ( req, res ) => { res.send(  "/user/profile"  ) }
+    async (req, res) => {
+    try {
+      // cart logic when the user logs in
+      let cart = await Cart.findOne({ user: req.user._id });
+      // if there is a cart session and user has no cart, save it to the user's cart in db
+      if (req.session.cart && !cart) {
+        const cart = await new Cart(req.session.cart);
+        cart.user = req.user._id;
+        await cart.save();
+      }
+      // if user has a cart in db, load it to session
+      if (cart) {
+        req.session.cart = cart;
+      }
+      // redirect to old URL before signing in
+      if (req.session.oldUrl) {
+        console.log(req.session.oldUrl);
+        var oldUrl = req.session.oldUrl;
+        req.session.oldUrl = null;
+        res.redirect(oldUrl);
+      } else {
+        res.send("/user/profile");
+      }
+    } catch (err) {
+      console.log(err);
+      req.flash("error", err.message);
+      return res.send("/");
+    }
+  }
 );
 
 // GET: display user's profile
 router.get("/profile", middleware.isLoggedIn, async (req, res) => {
   try {
-    res.json( { orders: null, pageName: "User Profile" });
+    // find all orders of this user
+   let allOrders = await Order.find({ user: req.user });
+    res.json( {
+      pageName: "user/profile",
+      data: { orders: allOrders, pageName: "User Profile" }
+  })
   } catch (err) {
     console.log(err);
     return res.send("/");
